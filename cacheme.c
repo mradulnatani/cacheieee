@@ -1,65 +1,43 @@
 #include "cacheme.h"
 
-bool scontinuation = true;
+bool scontinuation;
 
-
-void handle_signal(int signum) {
-    scontinuation = false;
-}
-
-void mainloop(int16 port) {
+void mainloop(int16_t port) {
     struct sockaddr_in sock;
     int s;
 
     sock.sin_family = AF_INET;
-    sock.sin_port = htons(port);
-    sock.sin_addr.s_addr = inet_addr(HOST);
+    sock.sin_port = htons((int)port);
+    sock.sin_addr.s_addr = INADDR_ANY;
+
 
     s = socket(AF_INET, SOCK_STREAM, 0);
-    if (s < 0) {
-        perror("Socket creation failed");
-        exit(EXIT_FAILURE);
-    }
+    assert(s > 0);
 
-    if (bind(s, (struct sockaddr *)&sock, sizeof(sock)) < 0) {
-        perror("Bind failed");
-        close(s);
-        exit(EXIT_FAILURE);
-    }
+    errno = 0;
+    if(bind(s, (struct sockaddr *)&sock, sizeof(sock)))
+        assert_perror(errno);
 
-    if (listen(s, 20) < 0) {
-        perror("Listen failed");
-        close(s);
-        exit(EXIT_FAILURE);
-    }
+    errno = 0;
+    if(listen(s, 20))
+        assert_perror(errno);
 
-    printf("Server listening on port %d...\n", port);
-
-    while (scontinuation) {
-        sleep(1); 
-    }
-
-    printf("Shutting down server...\n");
-    close(s);
+    scontinuation = false;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]){
     char *sport;
     int16 port;
-    char port_str[6];
 
-    if (argc < 2) {
-        snprintf(port_str, sizeof(port_str), "%d", PORT);
-        sport = port_str;
-    } else {
+    if(argc < 2)
+        sport = PORT;
+    else
         sport = argv[1];
-    }
 
-    port = (int16)strtol(sport, NULL, 10);
-    
-    signal(SIGINT, handle_signal);
+    port = (int16)atoi(sport);
 
-    mainloop(port);
-
+    scontinuation = true;
+    while(scontinuation)
+        mainloop(port); 
     return 0;
 }
