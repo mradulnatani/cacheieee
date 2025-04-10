@@ -1,4 +1,3 @@
-Here’s the improved and formatted version of your `README.md` that you can directly copy-paste into your repo:
 
 ```markdown
 # CacheMe
