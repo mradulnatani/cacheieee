@@ -1,13 +1,16 @@
-flags=-O2 -Wall -std=c2x
+flags = -O2 -Wall -std=c2x
+ldflags = 
 
 all: clean cacheme
 
-cacheme : cacheme.o
+cacheme: cacheme.o tree.o
 	cc ${flags} $^ -o $@ ${ldflags}
 
+cacheme.o: cacheme.c tree.h
+	cc ${flags} -c $<
 
-cacheme.o : cacheme.c
-	cc ${flags} -c $^
+tree.o: tree.c tree.h
+	cc ${flags} -c $<
 
-clean: 
+clean:
 	rm -f *.o cacheme
