@@ -1,5 +1,4 @@
 
-```markdown
 # CacheMe
 
 **CacheMe** is a lightweight, blazing-fast in-memory key-value data store written in C.
@@ -9,7 +8,7 @@ and socket management to memory storage and command parsing.
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Basic key-value operations**: `SET`, `GET`, `DEL`, `EXISTS`
 - **Key expiration with TTL support**: `SETEX`, `TTL`
@@ -23,7 +22,7 @@ and socket management to memory storage and command parsing.
 
 ---
 
-## 🧾 Supported Commands
+## Supported Commands
 
 | Command                | Description                                                                |
 |------------------------|----------------------------------------------------------------------------|
@@ -43,7 +42,7 @@ and socket management to memory storage and command parsing.
 
 ---
 
-## 🛠️ Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -104,7 +103,6 @@ TTL tempkey
 
 Here are some features planned for future releases:
 
-- **RESP (Redis Serialization Protocol)** support
 - **Snapshot-based persistence** (SAVE, LOAD)
 - **Eviction policies** (LRU, LFU, etc.)
 - **Pub/Sub system**
@@ -114,7 +112,7 @@ Here are some features planned for future releases:
 
 ---
 
-## 👨‍💻 Contributing
+##  Contributing
 
 Contributions, bug reports, and feature requests are welcome! Please feel free to fork the repository and submit a pull request.
 
@@ -122,24 +120,24 @@ Contributions, bug reports, and feature requests are welcome! Please feel free t
 
 ## 📜 License
 
-MIT License — do whatever you want with it, just don’t forget to give credit 😉
+MIT License
 
 ---
 
 ## 🤝 Acknowledgements
 
-- **Redis** for the idea and inspiration
+- **Redis and CodeCrafters** for the idea and inspiration
 - **Linux man pages** for socket programming guidance
-- **C programming legends** who made low-level hacking fun
+- **C programming GOAT** Dr. Jonas Brich
 
 ---
 
 ## 📞 Contact
 
-Made with 💻 by **Mradul**  
+Made by **Mradul**  
 Project port: `12049` | Protocol: Custom TCP  
 
-**CacheMe** if you can 😉
+**CacheMe** if you can 
 ```
 
 ---
