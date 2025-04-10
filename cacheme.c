@@ -3,27 +3,238 @@
 bool scontinuation;
 bool ccontinuation;
 
-void zero(int8 *buf, int16 size){
+KVStore kvstore;
+
+void zero(int8 *buf, int16 size) {
     int8 *p;
     int16 n;
-
-    for(n=0, p=buf; n<size; n++, p++)
+    for (n = 0, p = buf; n < size; n++, p++)
         *p = 0;
-
     return;
 }
 
-
-void child_loop(Client *cli){
-    sleep(1);
-    return;
-
-
+void clean_expired_keys() {
+    time_t now = time(NULL);
+    for (int i = 0; i < kvstore.size;) {
+        if (kvstore.store[i].expiry > 0 && kvstore.store[i].expiry <= now) {
+            del_key(kvstore.store[i].key);
+        } else {
+            i++;
+        }
+    }
 }
 
-void mainloop(int s){
+void set_key(const char* key, const char* value) {
+    for (int i = 0; i < kvstore.size; ++i) {
+        if (strcmp(kvstore.store[i].key, key) == 0) {
+            strncpy(kvstore.store[i].value, value, MAX_VAL_SIZE);
+            kvstore.store[i].expiry = 0;
+            return;
+        }
+    }
+    if (kvstore.size < MAX_STORE_SIZE) {
+        strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
+        strncpy(kvstore.store[kvstore.size].value, value, MAX_VAL_SIZE);
+        kvstore.store[kvstore.size].expiry = 0;
+        kvstore.size++;
+    }
+}
+
+const char* get_key(const char* key) {
+    time_t now = time(NULL);
+    for (int i = 0; i < kvstore.size; ++i) {
+        if (strcmp(kvstore.store[i].key, key) == 0) {
+            if (kvstore.store[i].expiry > 0 && kvstore.store[i].expiry <= now) {
+                del_key(key);
+                return NULL;
+            }
+            return kvstore.store[i].value;
+        }
+    }
+    return NULL;
+}
+
+bool del_key(const char* key) {
+    for (int i = 0; i < kvstore.size; ++i) {
+        if (strcmp(kvstore.store[i].key, key) == 0) {
+            for (int j = i; j < kvstore.size - 1; ++j) {
+                kvstore.store[j] = kvstore.store[j + 1];
+            }
+            kvstore.size--;
+            return true;
+        }
+    }
+    return false;
+}
+
+int exists_key(const char* key) {
+    for (int i = 0; i < kvstore.size; ++i) {
+        if (strcmp(kvstore.store[i].key, key) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+int get_key_index(const char* key) {
+    for (int i = 0; i < kvstore.size; ++i) {
+        if (strcmp(kvstore.store[i].key, key) == 0)
+            return i;
+    }
+    return -1;
+}
+
+void keys_list(int sock) {
+    for (int i = 0; i < kvstore.size; ++i) {
+        dprintf(sock, "%s\n", kvstore.store[i].key);
+    }
+}
+
+void flush_all() {
+    kvstore.size = 0;
+}
+
+void child_loop(Client *cli) {
+    char buffer[2048];
+    int n;
+
+    while ((n = read(cli->s, buffer, sizeof(buffer) - 1)) > 0) {
+        buffer[n] = '\0';
+
+        clean_expired_keys();
+
+        char command[10], key[MAX_KEY_SIZE], val[MAX_VAL_SIZE];
+        int args = sscanf(buffer, "%s %s \"%[^\"]\"", command, key, val);
+
+        if (strcasecmp(command, "SET") == 0 && args == 3) {
+            set_key(key, val);
+            dprintf(cli->s, "OK\n");
+        }
+        else if (strcasecmp(command, "SETEX") == 0) {
+            char ttl_str[16];
+            char value[MAX_VAL_SIZE];
+            int ttl;
+            if (sscanf(buffer, "%*s %s %s \"%[^\"]\"", key, ttl_str, value) == 3) {
+                ttl = atoi(ttl_str);
+                time_t expiry = time(NULL) + ttl;
+                int idx = get_key_index(key);
+                if (idx != -1) {
+                    strncpy(kvstore.store[idx].value, value, MAX_VAL_SIZE);
+                    kvstore.store[idx].expiry = expiry;
+                } else if (kvstore.size < MAX_STORE_SIZE) {
+                    strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
+                    strncpy(kvstore.store[kvstore.size].value, value, MAX_VAL_SIZE);
+                    kvstore.store[kvstore.size].expiry = expiry;
+                    kvstore.size++;
+                }
+                dprintf(cli->s, "OK\n");
+            } else {
+                dprintf(cli->s, "Invalid SETEX format\n");
+            }
+        }
+        else if (strcasecmp(command, "EXPIRE") == 0 && args >= 2) {
+            char ttl_str[16];
+            if (sscanf(buffer, "%*s %s %s", key, ttl_str) == 2) {
+                int ttl = atoi(ttl_str);
+                int idx = get_key_index(key);
+                if (idx != -1) {
+                    kvstore.store[idx].expiry = time(NULL) + ttl;
+                    dprintf(cli->s, "1\n");
+                } else {
+                    dprintf(cli->s, "0\n");
+                }
+            }
+        }
+        else if (strcasecmp(command, "TTL") == 0 && args >= 2) {
+            int idx = get_key_index(key);
+            if (idx != -1) {
+                time_t now = time(NULL);
+                if (kvstore.store[idx].expiry == 0)
+                    dprintf(cli->s, "-1\n");
+                else if (kvstore.store[idx].expiry <= now) {
+                    del_key(key);
+                    dprintf(cli->s, "-2\n");
+                } else {
+                    dprintf(cli->s, "%ld\n", kvstore.store[idx].expiry - now);
+                }
+            } else {
+                dprintf(cli->s, "-2\n");
+            }
+        }
+        else if (strcasecmp(command, "APPEND") == 0 && args == 3) {
+            int idx = get_key_index(key);
+            if (idx != -1) {
+snprintf(kvstore.store[idx].value + strlen(kvstore.store[idx].value),
+         MAX_VAL_SIZE - strlen(kvstore.store[idx].value),
+         "%s", val);
+            } else {
+                strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
+                strncpy(kvstore.store[kvstore.size].value, val, MAX_VAL_SIZE);
+                kvstore.size++;
+            }
+            dprintf(cli->s, "OK\n");
+        }
+        else if (strcasecmp(command, "INCR") == 0 && args >= 2) {
+            int idx = get_key_index(key);
+            if (idx != -1) {
+                int v = atoi(kvstore.store[idx].value);
+                v++;
+                snprintf(kvstore.store[idx].value, MAX_VAL_SIZE, "%d", v);
+                dprintf(cli->s, "%d\n", v);
+            } else {
+                strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
+                strcpy(kvstore.store[kvstore.size].value, "1");
+                kvstore.size++;
+                dprintf(cli->s, "1\n");
+            }
+        }
+        else if (strcasecmp(command, "DECR") == 0 && args >= 2) {
+            int idx = get_key_index(key);
+            if (idx != -1) {
+                int v = atoi(kvstore.store[idx].value);
+                v--;
+                snprintf(kvstore.store[idx].value, MAX_VAL_SIZE, "%d", v);
+                dprintf(cli->s, "%d\n", v);
+            } else {
+                strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
+                strcpy(kvstore.store[kvstore.size].value, "-1");
+                kvstore.size++;
+                dprintf(cli->s, "-1\n");
+            }
+        }
+        else if (strcasecmp(command, "GET") == 0 && args >= 2) {
+            const char* v = get_key(key);
+            dprintf(cli->s, v ? "%s\n" : "(nil)\n", v);
+        }
+        else if (strcasecmp(command, "DEL") == 0 && args >= 2) {
+            bool removed = del_key(key);
+            dprintf(cli->s, "%s\n", removed ? "(deleted)" : "(nil)");
+        }
+        else if (strcasecmp(command, "EXISTS") == 0 && args >= 2) {
+            dprintf(cli->s, "%d\n", exists_key(key));
+        }
+        else if (strcasecmp(command, "KEYS") == 0) {
+            keys_list(cli->s);
+        }
+        else if (strcasecmp(command, "FLUSHALL") == 0) {
+            flush_all();
+            dprintf(cli->s, "OK\n");
+        }
+        else if (strcasecmp(command, "PING") == 0) {
+            dprintf(cli->s, "PONG\n");
+        }
+        else if (strcasecmp(command, "QUIT") == 0) {
+            ccontinuation = false;
+            dprintf(cli->s, "Goodbye!\n");
+        }
+        else {
+            dprintf(cli->s, "Invalid command\n");
+        }
+    }
+}
+
+void mainloop(int s) {
     struct sockaddr_in cli;
-    int32 len;
+    int32 len = sizeof(cli);
     int s2;
     char *ip;
     int16 port;
@@ -31,7 +242,7 @@ void mainloop(int s){
     pid_t pid;
 
     s2 = accept(s, (struct sockaddr *)&cli, (unsigned int *)&len);
-    if(s2 < 0)
+    if (s2 < 0)
         return;
 
     port = (int16)htons((int)cli.sin_port);
@@ -39,32 +250,49 @@ void mainloop(int s){
 
     printf("Connection from %s:%d\n", ip, port);
 
-    client = (Client *)malloc(sizeof(struct s_client));
+    client = (Client *)malloc(sizeof(Client));
     assert(client);
-    
-    zero((int8 *)client, sizeof(struct s_client));
-    client->s = s;
+
+    zero((int8 *)client, sizeof(Client));
+    client->s = s2;
     client->port = port;
     strncpy(client->ip, ip, 15);
 
     pid = fork();
-    if(pid) {
+    if (pid) {
+        close(s2);
         free(client);
         return;
-    }
-    else{
-        dprintf(s2," 100 connected to cacheme server\n");
+    } else {
+        dprintf(s2,
+    "100 Connected to CacheMe server 🚀\n"
+    "\n"
+    "Available Commands:\n"
+    "  SET key \"value\"          - Set the value for a key\n"
+    "  SETEX key ttl \"value\"     - Set the value with expiry time in seconds\n"
+    "  GET key                  - Get the value of a key\n"
+    "  DEL key                  - Delete a key\n"
+    "  EXISTS key               - Check if a key exists (1 or 0)\n"
+    "  KEYS                    - List all keys\n"
+    "  QUIT                    - Disconnect from the server\n"
+    "\n"
+    "Features:\n"
+    "  • In-memory key-value store\n"
+    "  • TTL expiration support via SETEX\n"
+    "  • Concurrent multi-client support\n"
+    "  • Lightweight Redis-like interface\n"
+    "\n"
+    "Enjoy using CacheMe ❤️\n\n"
+);
+
         ccontinuation = true;
-        while(ccontinuation)
-        child_loop(client);
+        while (ccontinuation)
+            child_loop(client);
 
         close(s2);
         free(client);
-
-        return  ;
+        exit(0);
     }
-
-    return;
 }
 
 int initserver(int16_t port) {
@@ -75,28 +303,29 @@ int initserver(int16_t port) {
     sock.sin_port = htons((int)port);
     sock.sin_addr.s_addr = inet_addr(HOST);
 
-
     s = socket(AF_INET, SOCK_STREAM, 0);
     assert(s > 0);
 
     errno = 0;
-    if(bind(s, (struct sockaddr *)&sock, sizeof(sock)))
+    if (bind(s, (struct sockaddr *)&sock, sizeof(sock)))
         assert_perror(errno);
 
     errno = 0;
-    if(listen(s, 20))
+    if (listen(s, 20))
         assert_perror(errno);
 
-    printf("The server is running on %s:%d\n", HOST,port);
+    printf("The server is running on %s:%d\n", HOST, port);
     return s;
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
     char *sport;
     int16 port;
     int s;
 
-    if(argc < 2)
+    kvstore.size = 0;
+
+    if (argc < 2)
         sport = PORT;
     else
         sport = argv[1];
@@ -104,9 +333,8 @@ int main(int argc, char *argv[]){
     port = (int16)atoi(sport);
     s = initserver(port);
     scontinuation = true;
-    while(scontinuation)
-        mainloop(s); 
-
+    while (scontinuation)
+        mainloop(s);
 
     printf("Shutting down....\n");
     close(s);
