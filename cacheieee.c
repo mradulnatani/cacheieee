@@ -265,16 +265,22 @@ void mainloop(int s) {
         return;
     } else {
         dprintf(s2,
-    "100 Connected to CacheMe server 🚀\n"
+     "100 Connected to cacheieee server \n"
     "\n"
     "Available Commands:\n"
-    "  SET key \"value\"          - Set the value for a key\n"
-    "  SETEX key ttl \"value\"     - Set the value with expiry time in seconds\n"
-    "  GET key                  - Get the value of a key\n"
-    "  DEL key                  - Delete a key\n"
-    "  EXISTS key               - Check if a key exists (1 or 0)\n"
-    "  KEYS                    - List all keys\n"
-    "  QUIT                    - Disconnect from the server\n"
+    "  SET key value             - Sets the value for the given key\n"
+    "  GET key                   - Retrieves the value associated with the key\n"
+    "  DEL key                   - Deletes the key and its value\n"
+    "  EXISTS key                - Checks if the key exists in the store\n"
+    "  KEYS pattern              - Returns all keys matching the given pattern (e.g., *, user*, etc.)\n"
+    "  SETEX key ttl value       - Sets a value with a TTL (in seconds)\n"
+    "  TTL key                   - Returns the remaining time to live (TTL) for a key\n"
+    "  INCR key                  - Increments an integer value by 1\n"
+    "  DECR key                  - Decrements an integer value by 1\n"
+    "  PING                      - Health check — responds with PONG\n"
+    "  FLUSHALL                  - Deletes all keys in the current database (dangerous!)\n"
+    "  INFO                      - Returns server stats (upcoming)\n"
+    "  QUIT                      - Closes the client connection gracefully\n"
     "\n"
     "Features:\n"
     "  • In-memory key-value store\n"
@@ -282,7 +288,7 @@ void mainloop(int s) {
     "  • Concurrent multi-client support\n"
     "  • Lightweight Redis-like interface\n"
     "\n"
-    "Enjoy using CacheMe ❤️\n\n"
+    "Enjoy using cacheieee\n\n"
 );
 
         ccontinuation = true;
