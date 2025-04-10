@@ -1,7 +1,7 @@
 
-# CacheMe
+# cacheieee
 
-**CacheMe** is a lightweight, blazing-fast in-memory key-value data store written in C.
+**cacheieee** is a lightweight, blazing-fast in-memory key-value data store written in C.
 Inspired by Redis, CacheMe provides essential caching capabilities and gives developers a
 behind-the-scenes look at how high-performance caching systems are built — from TCP networking
 and socket management to memory storage and command parsing.
@@ -54,11 +54,11 @@ and socket management to memory storage and command parsing.
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/cacheme.git
+    git clone https://github.com/mradulnatani/cacheieee.git
     ```
 2. Navigate into the project directory:
     ```bash
-    cd cacheme
+    cd cacheieee
     ```
 3. Build the project using `make`:
     ```bash
@@ -72,7 +72,7 @@ and socket management to memory storage and command parsing.
 To start the **CacheMe** server, simply run the following command:
 
 ```bash
-./cacheme
+./cacheieee
 ```
 
 This will start the server on the default port **12049**.
@@ -135,7 +135,7 @@ MIT License
 ## 📞 Contact
 
 Made by **Mradul**  
-Project port: `12049` | Protocol: Custom TCP  
+Project port: `12049` | Protocol: TCP  
 
 **CacheMe** if you can 
 ```
