@@ -142,4 +142,3 @@ Project port: `12049` | Protocol: TCP
 
 ---
 
-Feel free to copy this directly into your `README.md` file. Let me know if you need further modifications!
