@@ -1,0 +1,47 @@
+
+CacheMe Features (as of now)
+
+Basic Key-Value Commands
+------------------------------------------
+SET key "value"     - Stores the value under a given key.
+GET key             - Retrieves the value for a key if it exists.
+DEL key             - Deletes the specified key.
+EXISTS key          - Checks if the key exists and hasn’t expired.
+KEYS                - Lists all current non-expired keys.
+
+TTL (Time-To-Live) Support
+------------------------------------------
+SETEX key ttl "value" - Sets the value with an expiration time in seconds.
+Auto TTL Cleanup      - Automatically ignores or removes expired keys on access.
+
+Multi-Client Handling
+------------------------------------------
+Concurrent Clients   - Each client handled via forked process.
+Graceful Exit        - Clients can disconnect using QUIT.
+Independent Sessions - Each session is isolated.
+
+Session & Input Handling
+------------------------------------------
+Command Parsing      - Supports quoted values like "hello world".
+Trimming Input       - Removes extra spaces and newlines.
+Signal Handling      - Reaps zombie processes via SIGCHLD.
+Clean Shutdown       - Server handles SIGINT for graceful termination.
+
+Architecture & Design
+------------------------------------------
+In-memory Store      - Fast key-value store in RAM.
+Tree-based Store     - Uses binary search tree for managing keys.
+Max Length Checks    - Enforces limits on key/value length.
+Command Error Handling - Friendly error messages for invalid commands.
+Internal TTL Checks  - TTLs are checked during every access.
+
+Limits and Constants
+------------------------------------------
+Max Key Size         - 32 bytes
+Max Value Size       - 1024 bytes
+Max Keys Supported   - 1024
+
+Client UX Feature
+------------------------------------------
+Welcome Message      - Lists all commands on client connect.
+Command Help         - Describes commands in client message.
