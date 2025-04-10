@@ -2,7 +2,10 @@
 ```markdown
 # CacheMe
 
-**CacheMe** is a lightweight, blazing-fast in-memory key-value data store written in C. Inspired by Redis, CacheMe provides essential caching capabilities and gives developers a behind-the-scenes look at how high-performance caching systems are built — from TCP networking and socket management to memory storage and command parsing.
+**CacheMe** is a lightweight, blazing-fast in-memory key-value data store written in C.
+Inspired by Redis, CacheMe provides essential caching capabilities and gives developers a
+behind-the-scenes look at how high-performance caching systems are built — from TCP networking
+and socket management to memory storage and command parsing.
 
 ---
 
