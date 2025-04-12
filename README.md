@@ -99,6 +99,14 @@ TTL tempkey
 ---
 
 
+## Want to use Cacheiee via python?
+
+Install cacheieee python client via
+
+```bash
+pip install cacheieee
+```
+
 ## 📈 Future Roadmap
 
 Here are some features planned for future releases:
