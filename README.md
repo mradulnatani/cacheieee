@@ -90,9 +90,9 @@ nc localhost 12049
 Once connected, you can issue the supported commands directly:
 
 ```bash
-SET name cacheieee
+SET "name" "cacheieee"
 GET name
-SETEX tempkey 10 hello
+SETEX "tempkey" 10 "hello"
 TTL tempkey
 ```
 
