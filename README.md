@@ -24,8 +24,8 @@ and socket management to memory storage and command parsing.
 
 ## Supported Commands
 
-| Command                | Description                                                                |
-|------------------------|----------------------------------------------------------------------------|
+| Command                 | Description                                                               |
+|-------------------------|---------------------------------------------------------------------------|
 | `SET key value`         | Sets the value for the given key                                          |
 | `GET key`               | Retrieves the value associated with the key                               |
 | `DEL key`               | Deletes the key and its value                                             |
@@ -39,6 +39,7 @@ and socket management to memory storage and command parsing.
 | `FLUSHALL`              | Deletes all keys in the current database (dangerous!)                     |
 | `INFO`                  | Returns server stats (upcoming)                                           |
 | `QUIT`                  | Closes the client connection gracefully                                   |
+| `TREE`                  | Displays the current tree structure of the key value store                |
 
 ---
 
@@ -99,13 +100,6 @@ TTL tempkey
 ---
 
 
-## Want to use Cacheiee via python?
-
-Install cacheieee python client via
-
-```bash
-pip install cacheieee
-```
 
 ## 📈 Future Roadmap
 
