@@ -60,5 +60,7 @@ bool del_key(const char*);
 int exists_key(const char*);
 void keys_list(int);
 void clean_expired_keys(void);
+void log_messege(const char *messege);
+
 
 #endif

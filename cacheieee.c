@@ -6,6 +6,31 @@ void print_tree_structure(int s);
 
 KVStore kvstore;
 
+void log_message(const char *message) {
+    FILE *logfile = fopen("server_log.txt", "a");
+    if (logfile) {
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+        char timestr[64];
+        strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", t);
+        fprintf(logfile, "[%s] %s\n", timestr, message);
+        fclose(logfile);
+    }
+}
+
+void client_connected(Client *cli) {
+    char message[256];
+    snprintf(message, sizeof(message), "Client Connected: %s:%d", cli->ip, cli->port);
+    log_message(message);
+}
+
+void client_disconnected(Client *cli) {
+    char message[256];
+    snprintf(message, sizeof(message), "Client Disconnected: %s:%d", cli->ip, cli->port);
+    log_message(message);
+}
+
+
 void zero(int8 *buf, int16 size) {
     int8 *p;
     int16 n;
@@ -264,7 +289,6 @@ void print_tree_structure(int s){
 
 
 
-
 void mainloop(int s) {
     struct sockaddr_in cli;
     int32 len = sizeof(cli);
@@ -278,20 +302,29 @@ void mainloop(int s) {
     if (s2 < 0)
         return;
 
-    port = (int16)htons((int)cli.sin_port);
-    ip = inet_ntoa(cli.sin_addr);
+port = ntohs(cli.sin_port);
+ip = inet_ntoa(cli.sin_addr);
 
-    printf("Connection from %s:%d\n", ip, port);
+printf("Connection from %s:%d\n", ip, port);
 
-    client = (Client *)malloc(sizeof(Client));
-    assert(client);
+// Allocate memory first
+client = (Client *)malloc(sizeof(Client));
+assert(client);
 
-    zero((int8 *)client, sizeof(Client));
-    client->s = s2;
-    client->port = port;
-    strncpy(client->ip, ip, 15);
+// Zero the memory and initialize
+zero((int8 *)client, sizeof(Client));
+client->s = s2;
+client->port = port;
+strncpy(client->ip, ip, 15);
 
-    pid = fork();
+// Now safely call client_connected
+client_connected(client);
+
+// Now fork
+pid = fork();
+
+
+
     if (pid) {
         close(s2);
         free(client);
@@ -329,6 +362,8 @@ void mainloop(int s) {
         while (ccontinuation)
             child_loop(client);
 
+  client_disconnected(client);
+
         close(s2);
         free(client);
         exit(0);
@@ -357,6 +392,7 @@ int initserver(int16_t port) {
     printf("The server is running on %s:%d\n", HOST, port);
     return s;
 }
+
 
 int main(int argc, char *argv[]) {
     char *sport;
