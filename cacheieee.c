@@ -314,7 +314,10 @@ void mainloop(int s) {
     "  FLUSHALL                  - Deletes all keys in the current database (dangerous!)\n"
     "  INFO                      - Returns server stats (upcoming)\n"
     "  QUIT                      - Closes the client connection gracefully\n"
+<<<<<<< HEAD
     "  TREE                      - Displays the current structure of the key value store shored inside the tree\n"
+=======
+>>>>>>> 663cb33057bf2fd16edd8b34719e0a3f6c043c94
     "\n"
     "Features:\n"
     "  • In-memory key-value store\n"

@@ -2,7 +2,7 @@
 # cacheieee
 
 **cacheieee** is a lightweight, blazing-fast in-memory key-value data store written in C.
-Inspired by Redis, CacheMe provides essential caching capabilities and gives developers a
+Inspired by Redis, cacheieee provides essential caching capabilities and gives developers a
 behind-the-scenes look at how high-performance caching systems are built — from TCP networking
 and socket management to memory storage and command parsing.
 
@@ -69,7 +69,7 @@ and socket management to memory storage and command parsing.
 
 ## 🚀 Running the Server
 
-To start the **CacheMe** server, simply run the following command:
+To start the **cacheieee** server, simply run the following command:
 
 ```bash
 ./cacheieee
@@ -90,14 +90,22 @@ nc localhost 12049
 Once connected, you can issue the supported commands directly:
 
 ```bash
-SET name CacheMe
+SET "name" "cacheieee"
 GET name
-SETEX tempkey 10 hello
+SETEX "tempkey" 10 "hello"
 TTL tempkey
 ```
 
 ---
 
+
+## Want to use Cacheiee via python?
+
+Install cacheieee python client via
+
+```bash
+pip install cacheieee
+```
 
 ## 📈 Future Roadmap
 
@@ -138,8 +146,5 @@ Made by **Mradul**
 Project port: `12049` | Protocol: TCP  
 
 **CacheMe** if you can 
-```
 
----
 
-Feel free to copy this directly into your `README.md` file. Let me know if you need further modifications!
