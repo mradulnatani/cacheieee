@@ -1,0 +1,13 @@
+{
+  "service": {
+    "name": "cacheme",
+    "address": "127.0.0.1",
+    "port": 12049,
+    "check": {
+      "tcp": "127.0.0.1:12049",
+      "interval": "10s",
+      "timeout": "1s"
+    }
+  }
+}
+

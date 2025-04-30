@@ -2,6 +2,7 @@
 
 bool scontinuation;
 bool ccontinuation;
+void print_tree_structure(int s);
 
 KVStore kvstore;
 
@@ -96,7 +97,9 @@ void flush_all() {
 void child_loop(Client *cli) {
     char buffer[2048];
     int n;
+    
 
+    dprintf(cli->s,"\033[0;32mcacheieee> \033[0m");
     while ((n = read(cli->s, buffer, sizeof(buffer) - 1)) > 0) {
         buffer[n] = '\0';
 
@@ -225,12 +228,42 @@ snprintf(kvstore.store[idx].value + strlen(kvstore.store[idx].value),
         else if (strcasecmp(command, "QUIT") == 0) {
             ccontinuation = false;
             dprintf(cli->s, "Goodbye!\n");
+		    close(cli->s);
+	    return;
         }
+	else if (strcasecmp(command, "TREE") == 0) {
+    print_tree_structure(cli->s);
+}
         else {
             dprintf(cli->s, "Invalid command\n");
         }
+	dprintf(cli->s, "\033[0;32mcacheieee> \033[0m");
     }
 }
+
+
+
+void print_tree_structure(int s){
+	dprintf(s,"The tree structure for the key value pairs is:");
+	for(int i=0;i<kvstore.size;i++){
+		KVPair *pair = &kvstore.store[i];
+		dprintf(s, "Key: %s\n", pair->key);
+                dprintf(s, "Value: %s\n", pair->value);
+
+		 if (pair->expiry > 0) {
+            dprintf(s, "Expiration Time: %ld\n", pair->expiry);
+        } else {
+            dprintf(s, "Expiration Time: Not Set\n");
+        }
+
+        dprintf(s, "--------------------------\n");
+    }
+
+    dprintf(s, "End of Tree Structure\n");
+}
+
+
+
 
 void mainloop(int s) {
     struct sockaddr_in cli;
@@ -281,6 +314,7 @@ void mainloop(int s) {
     "  FLUSHALL                  - Deletes all keys in the current database (dangerous!)\n"
     "  INFO                      - Returns server stats (upcoming)\n"
     "  QUIT                      - Closes the client connection gracefully\n"
+    "  TREE                      - Displays the current structure of the key value store shored inside the tree\n"
     "\n"
     "Features:\n"
     "  • In-memory key-value store\n"
