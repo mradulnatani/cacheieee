@@ -17,7 +17,16 @@ void log_message(const char *message) {
         fclose(logfile);
     }
 }
+int is_number(const char *str) {
+    if (*str == '-' || *str == '+') str++; // allow leading sign
+    if (!*str) return 0; // empty string after sign
 
+    while (*str) {
+        if (!isdigit(*str)) return 0;
+        str++;
+    }
+    return 1;
+}
 void client_connected(Client *cli) {
     char message[256];
     snprintf(message, sizeof(message), "Client Connected: %s:%d", cli->ip, cli->port);
@@ -202,34 +211,42 @@ snprintf(kvstore.store[idx].value + strlen(kvstore.store[idx].value),
             dprintf(cli->s, "OK\n");
         }
         else if (strcasecmp(command, "INCR") == 0 && args >= 2) {
-            int idx = get_key_index(key);
-            if (idx != -1) {
-                int v = atoi(kvstore.store[idx].value);
-                v++;
-                snprintf(kvstore.store[idx].value, MAX_VAL_SIZE, "%d", v);
-                dprintf(cli->s, "%d\n", v);
-            } else {
-                strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
-                strcpy(kvstore.store[kvstore.size].value, "1");
-                kvstore.size++;
-                dprintf(cli->s, "1\n");
-            }
+    int idx = get_key_index(key);
+    if (idx != -1) {
+        if (is_number(kvstore.store[idx].value)) {
+            int v = atoi(kvstore.store[idx].value);
+            v++;
+            snprintf(kvstore.store[idx].value, MAX_VAL_SIZE, "%d", v);
+            dprintf(cli->s, "%d\n", v);
+        } else {
+            dprintf(cli->s, "ERR: Value is not an integer\n");
         }
+    } else {
+        strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
+        strcpy(kvstore.store[kvstore.size].value, "1");
+        kvstore.size++;
+        dprintf(cli->s, "1\n");
+    }
+}
         else if (strcasecmp(command, "DECR") == 0 && args >= 2) {
-            int idx = get_key_index(key);
-            if (idx != -1) {
-                int v = atoi(kvstore.store[idx].value);
-                v--;
-                snprintf(kvstore.store[idx].value, MAX_VAL_SIZE, "%d", v);
-                dprintf(cli->s, "%d\n", v);
-            } else {
-                strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
-                strcpy(kvstore.store[kvstore.size].value, "-1");
-                kvstore.size++;
-                dprintf(cli->s, "-1\n");
-            }
+    int idx = get_key_index(key);
+    if (idx != -1) {
+        if (is_number(kvstore.store[idx].value)) {
+            int v = atoi(kvstore.store[idx].value);
+            v--;
+            snprintf(kvstore.store[idx].value, MAX_VAL_SIZE, "%d", v);
+            dprintf(cli->s, "%d\n", v);
+        } else {
+            dprintf(cli->s, "ERR: Value is not an integer\n");
         }
-        else if (strcasecmp(command, "GET") == 0 && args >= 2) {
+    } else {
+        strncpy(kvstore.store[kvstore.size].key, key, MAX_KEY_SIZE);
+        strcpy(kvstore.store[kvstore.size].value, "-1");
+        kvstore.size++;
+        dprintf(cli->s, "-1\n");
+    }
+}
+else if (strcasecmp(command, "GET") == 0 && args >= 2) {
             const char* v = get_key(key);
             dprintf(cli->s, v ? "%s\n" : "(nil)\n", v);
         }
@@ -269,14 +286,16 @@ snprintf(kvstore.store[idx].value + strlen(kvstore.store[idx].value),
 
 
 void print_tree_structure(int s){
-	dprintf(s,"The tree structure for the key value pairs is:");
+	 time_t current_time = time(NULL);
+	dprintf(s,"The tree structure for the key value pairs is:\n");
 	for(int i=0;i<kvstore.size;i++){
 		KVPair *pair = &kvstore.store[i];
 		dprintf(s, "Key: %s\n", pair->key);
                 dprintf(s, "Value: %s\n", pair->value);
+            long remaining_time = pair->expiry - current_time;
 
 		 if (pair->expiry > 0) {
-            dprintf(s, "Expiration Time: %ld\n", pair->expiry);
+            dprintf(s, "Expiration Time: %ld\n", remaining_time);
         } else {
             dprintf(s, "Expiration Time: Not Set\n");
         }
