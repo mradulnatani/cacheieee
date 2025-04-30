@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <time.h>
+#include <ctype.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -53,6 +54,7 @@ void child_loop(Client*);
 int initserver(int16_t);
 void mainloop(int);
 int main(int, char**);
+int is_number(const char*);
 
 void set_key(const char*, const char*);
 const char* get_key(const char*);
