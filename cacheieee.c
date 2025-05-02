@@ -276,6 +276,36 @@ else if (strcasecmp(command, "GET") == 0 && args >= 2) {
 	else if (strcasecmp(command, "TREE") == 0) {
     print_tree_structure(cli->s);
 }
+else if(strcasecmp(command,"CMD") ==0){
+		        dprintf(cli->s,
+    "\n"
+    "Available Commands:\n"
+    "  SET key value             - Sets the value for the given key\n"
+    "  GET key                   - Retrieves the value associated with the key\n"
+    "  DEL key                   - Deletes the key and its value\n"
+    "  EXISTS key                - Checks if the key exists in the store\n"
+    "  KEYS pattern              - Returns all keys matching the given pattern (e.g., *, user*, etc.)\n"
+    "  SETEX key ttl value       - Sets a value with a TTL (in seconds)\n"
+    "  TTL key                   - Returns the remaining time to live (TTL) for a key\n"
+    "  INCR key                  - Increments an integer value by 1\n"
+    "  DECR key                  - Decrements an integer value by 1\n"
+    "  PING                      - Health check — responds with PONG\n"
+    "  FLUSHALL                  - Deletes all keys in the current database (dangerous!)\n"
+    "  INFO                      - Returns server stats (upcoming)\n"
+    "  QUIT                      - Closes the client connection gracefully\n"
+    "  TREE                      - Displays the current structure of the key value store shored inside the tree\n"
+    "  CMD                       - Displays all the commands \n"
+    "\n"
+    "Features:\n"
+    "  • In-memory key-value store\n"
+    "  • TTL expiration support via SETEX\n"
+    "  • Concurrent multi-client support\n"
+    "  • Lightweight Redis-like interface\n"
+    "\n"
+
+);
+
+}
         else {
             dprintf(cli->s, "Invalid command\n");
         }
@@ -350,32 +380,24 @@ pid = fork();
         return;
     } else {
         dprintf(s2,
-     "100 Connected to cacheieee server \n"
-    "\n"
-    "Available Commands:\n"
-    "  SET key value             - Sets the value for the given key\n"
-    "  GET key                   - Retrieves the value associated with the key\n"
-    "  DEL key                   - Deletes the key and its value\n"
-    "  EXISTS key                - Checks if the key exists in the store\n"
-    "  KEYS pattern              - Returns all keys matching the given pattern (e.g., *, user*, etc.)\n"
-    "  SETEX key ttl value       - Sets a value with a TTL (in seconds)\n"
-    "  TTL key                   - Returns the remaining time to live (TTL) for a key\n"
-    "  INCR key                  - Increments an integer value by 1\n"
-    "  DECR key                  - Decrements an integer value by 1\n"
-    "  PING                      - Health check — responds with PONG\n"
-    "  FLUSHALL                  - Deletes all keys in the current database (dangerous!)\n"
-    "  INFO                      - Returns server stats (upcoming)\n"
-    "  QUIT                      - Closes the client connection gracefully\n"
-    "  TREE                      - Displays the current structure of the key value store shored inside the tree\n"
-    "\n"
-    "Features:\n"
-    "  • In-memory key-value store\n"
-    "  • TTL expiration support via SETEX\n"
-    "  • Concurrent multi-client support\n"
-    "  • Lightweight Redis-like interface\n"
-    "\n"
-    "Enjoy using cacheieee\n\n"
+    "\n\033[0;32m100 Connected to cacheieee server\n\033[0m"
+    "\033[0;35m"
+    "        ／＞　 フ\n"
+    "       | 　_　_|        \n"
+    "     ／` ミ＿xノ       \n"
+    "    /　　　　 |        \n"
+    "   /　 ヽ　　 ﾉ        \n"
+    "   │　　|　|　|        \n"
+    "／￣|　　 |　|　|        \n"
+    "| (￣ヽ＿_ヽ_)__)       \n"
+    "＼二つ\n"
+    "\033[0m"
+    "\033[0;31m"
+    "Use 'CMD' command to know all the commands\n"
+    "Enjoy using Cacheieee and remember YOU ARE BEING CACHED!!!\n"
+    "\033[0m\n"
 );
+
 
         ccontinuation = true;
         while (ccontinuation)
