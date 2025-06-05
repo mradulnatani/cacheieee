@@ -68,7 +68,7 @@ and socket management to memory storage and command parsing.
 
 ---
 
-## 🚀 Running the Server
+##  Running the Server
 
 To start the **cacheieee** server, simply run the following command:
 
@@ -80,7 +80,7 @@ This will start the server on the default port **12049**.
 
 ---
 
-## 🔗 Connecting to the Server
+##  Connecting to the Server
 
 You can use tools like **telnet**, **netcat** (`nc`), or even your own client to connect to the server:
 
@@ -101,7 +101,7 @@ TTL tempkey
 
 
 
-## 📈 Future Roadmap
+##  Future Roadmap
 
 Here are some features planned for future releases:
 
@@ -111,6 +111,7 @@ Here are some features planned for future releases:
 - **Clustering and replication**
 - **Role-based authentication**
 - Admin dashboard (via WebSocket + React?)
+- Proper algorithm for LRU and other related stuff
 
 ---
 
@@ -120,13 +121,13 @@ Contributions, bug reports, and feature requests are welcome! Please feel free t
 
 ---
 
-## 📜 License
+##  License
 
 MIT License
 
 ---
 
-## 🤝 Acknowledgements
+##  Acknowledgements
 
 - **Redis and CodeCrafters** for the idea and inspiration
 - **Linux man pages** for socket programming guidance
@@ -134,7 +135,7 @@ MIT License
 
 ---
 
-## 📞 Contact
+##  Contact
 
 Made by **Mradul**  
 Project port: `12049` | Protocol: TCP  
